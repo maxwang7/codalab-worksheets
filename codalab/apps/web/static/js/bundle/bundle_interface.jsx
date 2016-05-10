@@ -1,7 +1,6 @@
 /*
-TODO: replace this with WorksheetSidePanel.
-*/
-
+Stand-alone bundle details interface.
+ */
 var Bundle = React.createClass({
     getInitialState: function(){
         return {
@@ -19,9 +18,8 @@ var Bundle = React.createClass({
             "fileBrowserData": "",
             "currentWorkingDirectory": "",
             "editing": false,
-            "edit_permission": false,
             "permission": 0,
-            "permission_str": ''
+            "permission_spec": ''
         };
     },
     toggleEditing: function(){
@@ -33,56 +31,85 @@ var Bundle = React.createClass({
             var key = $(this).attr('name');
             var val = $(this).val();
             if (val.toLowerCase() === 'true' || val.toLowerCase() === 'false') {
-                //  Convert string 'true'/'false' to boolean true/false
+                // Convert string 'true'/'false' to boolean true/false
                 val = (val.toLowerCase() === 'true');
             }
-            new_metadata[key] = val;
+            if (new_metadata[key].constructor === Array) {
+                // Convert string comma-separated list to Array
+                val = val.split(',');
+            }
+            if (val != new_metadata[key]) {
+                new_metadata[key] = val;
+            }
         });
 
         console.log('------ save the bundle here ------');
         console.log('new metadata:');
         console.log(new_metadata);
         var postdata = {
-            'metadata': new_metadata,
-            'uuid': this.state.uuid
+            data: {
+                id: this.state.uuid,
+                type: 'bundles',
+                attributes: {
+                    bundle_type: this.state.bundle_type,
+                    metadata: new_metadata
+                }
+            }
         };
 
         $.ajax({
-            type: "POST",
+            type: "PATCH",
             cache: false,
-            //  /api/bundles/0x706<...>d5b66e
-            url: "/rest/api" + document.location.pathname,
-            contentType:"application/json; charset=utf-8",
-            dataType:"json",
+            //  /rest/bundles/0x706<...>d5b66e
+            url: "/rest/bundles/" + this.state.uuid,
+            contentType: "application/json; charset=utf-8",
+            dataType: "json",
             data: JSON.stringify(postdata),
+            headers: {
+                'X-HTTP-Method-Override': 'PATCH'
+            },
+            xhr: function() {
+                // Hack for IE < 9 to use PATCH method
+                return window.XMLHttpRequest == null || new window.XMLHttpRequest().addEventListener == null
+                  ? new window.ActiveXObject("Microsoft.XMLHTTP")
+                  : $.ajaxSettings.xhr();
+            },
             success: function(data) {
                 this.setState(data);
                 this.setState({
-                     editing:false,
+                     editing: false,
                 });
                 $("#bundle-message").hide().removeClass('alert-danger alert');
             }.bind(this),
             error: function(xhr, status, err) {
-                $("#bundle-message").html(xhr.responseText).addClass('alert-danger alert');
+                $("#bundle-message").text(xhr.responseText).addClass('alert-danger alert');
                 $("#bundle-message").show();
             }.bind(this)
         });
     },
     componentWillMount: function() {  // once on the page lets get the bundle info
+        var uuid = window.location.pathname.split('/')[2];
         $.ajax({
             type: "GET",
-            //  /api/bundles/0x706<...>d5b66e
-            url: "/rest/api" + document.location.pathname,
+            //  /rest/bundles/0x706<...>d5b66e
+            url: "/rest/bundles/" + uuid,
+            data: {
+                include: 'users,bundle-permissions'
+            },
             dataType: 'json',
             cache: false,
             success: function(data) {
-                if(this.isMounted()){
-                    this.setState(data);
+                // Use ephemeral JsonApiDataStore to wire up relationships
+                var store = new JsonApiDataStore();
+                if (this.isMounted()) {
+                    this.setState(store.sync(data));
                 }
                 $("#bundle-message").hide().removeClass('alert-danger alert');
             }.bind(this),
             error: function(xhr, status, err) {
-                $("#bundle-message").html(xhr.responseText).addClass('alert-danger alert');
+                $("#bundle-message")
+                    .html(xhr.responseText)
+                    .addClass('alert-danger alert');
                 $("#bundle-message").show();
                 $('#bundle-content').hide();
             }.bind(this)
@@ -120,14 +147,19 @@ var Bundle = React.createClass({
             }
         }
 
+        var uuid = window.location.pathname.split('/')[2];
+
         $.ajax({
             type: "GET",
-            //  /api/bundles/0x706<...>d5b66e
-            url: document.location.pathname.replace('/bundles/', '/rest/api/bundles/content/') + folder_path + '/', //extra slash at end means root dir
+            //  /rest/bundles/0x706<...>d5b66e/contents/info/<path>
+            url: '/rest/bundles/' + uuid + '/contents/info/' + folder_path + '/', //extra slash at end means root dir
+            data: {
+                depth: 1
+            },
             dataType: 'json',
             cache: false,
-            success: function(data) {
-                this.setState({"fileBrowserData": data});
+            success: function(response) {
+                this.setState({"fileBrowserData": response.data});
             }.bind(this),
             error: function(xhr, status, err) {
                 $("#bundle-message").html(xhr.responseText).addClass('alert-danger alert');
@@ -140,6 +172,7 @@ var Bundle = React.createClass({
     render: function() {
         var saveButton;
         var metadata = this.state.metadata;
+        // TODO(sckoo): point at pluralized root when updated
         var bundle_download_url = "/rest/bundle/" + this.state.uuid + "/contents/blob/";
         var bundleAttrs = [];
         var editing = this.state.editing;
@@ -236,7 +269,7 @@ var Bundle = React.createClass({
 
         /// ------------------------------------------------------------------
         var edit = ''
-        if(this.state.edit_permission){
+        if(this.state.permission >= 2){
             edit = (
                 <button className="btn btn-primary btn-sm" onClick={this.toggleEditing}>
                     {editButtonText}
@@ -290,7 +323,7 @@ var Bundle = React.createClass({
                             <h2 className="bundle-name bundle-icon-sm bundle-icon-sm-indent">
                                 {this.state.metadata.name}
                             </h2>
-                            <em> Owner: {this.state.owner_name}</em>
+                            <em> Owner: {this.state.owner ? this.state.owner.user_name : ''}</em>
                         </div>
                         <div className="col-sm-6">
                             <a href={bundle_download_url} className="bundle-download btn btn-default btn-sm" alt="Download Bundle">
@@ -353,7 +386,7 @@ var Bundle = React.createClass({
                 </h3>
                 <div className="row">
                     <div className="col-sm-6">
-                        <em>Permission: {this.state.permission_str}</em>
+                        <em>Permission: {this.state.permission_spec}</em>
                         <div className="metadata-table">
                             <table id="metadata_table" className={tableClassName}>
                                 <tbody>
@@ -373,26 +406,28 @@ var Bundle = React.createClass({
 
 var BundleAttr = React.createClass({
     render: function(){
-        var defaultVal = this.props.val;
-        if(this.props.index !== 'description' && !this.props.editing){
+        var val = this.props.val;
+        if (this.props.index !== 'description' && !this.props.editing) {
+            val = (val.constructor === Array) ? val.join(', ') : val;
             return (
                 <tr>
                     <th width="33%">
                         {this.props.index}
                     </th>
                     <td>
-                        {defaultVal}
+                        {val}
                     </td>
                 </tr>
             );
-        } else if(this.props.editing){
+        } else if (this.props.editing) {
+            val = (val.constructor === Array) ? val.join(',') : val;
             return (
                 <tr>
                     <th width="33%">
                         {this.props.index}
                     </th>
                     <td>
-                        <input className="form-control" name={this.props.index} type="text" defaultValue={defaultVal} />
+                        <input className="form-control" name={this.props.index} type="text" defaultValue={val} />
                     </td>
                 </tr>
             )
