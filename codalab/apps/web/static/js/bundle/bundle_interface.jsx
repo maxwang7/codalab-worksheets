@@ -1,6 +1,9 @@
 /*
 Stand-alone bundle details interface.
  */
+
+var EDIT_PERMISSION = 2;
+
 var Bundle = React.createClass({
     getInitialState: function(){
         return {
@@ -43,9 +46,6 @@ var Bundle = React.createClass({
             }
         });
 
-        console.log('------ save the bundle here ------');
-        console.log('new metadata:');
-        console.log(new_metadata);
         var postdata = {
             data: {
                 id: this.state.uuid,
@@ -99,9 +99,9 @@ var Bundle = React.createClass({
             dataType: 'json',
             cache: false,
             success: function(data) {
-                // Use ephemeral JsonApiDataStore to wire up relationships
-                var store = new JsonApiDataStore();
                 if (this.isMounted()) {
+                    // Use ephemeral JsonApiDataStore to wire up relationships
+                    var store = new JsonApiDataStore();
                     this.setState(store.sync(data));
                 }
                 $("#bundle-message").hide().removeClass('alert-danger alert');
@@ -268,7 +268,7 @@ var Bundle = React.createClass({
 
         /// ------------------------------------------------------------------
         var edit = ''
-        if(this.state.permission >= 2){
+        if(this.state.permission == EDIT_PERMISSION){
             edit = (
                 <button className="btn btn-primary btn-sm" onClick={this.toggleEditing}>
                     {editButtonText}
@@ -494,7 +494,6 @@ var FileBrowser = React.createClass({
 var FileBrowserBreadCrumbs = React.createClass({
     breadCrumbClicked: function(path) {
         this.props.updateFileBrowser(path, true);
-        console.log("breadcrumb -> "+path);
     },
     render: function() {
         var links = [];
