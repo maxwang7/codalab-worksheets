@@ -2,12 +2,43 @@ function render_permissions(state) {
   // Render permissions:
   // - state.permission_str (what user has)
   // - state.group_permissions (what other people have)
-  var permission_str = 'you(' + (state.permission_str || '?') + ')';
-  permission_str += (state.group_permissions || []).map(function(perm) {
-    return ' ' + perm.group_name + "(" + perm.permission_str + ")";
-  }).join('');
-  permission_str;
-  return permission_str;
+  
+  function permissionToColor(permission) {
+    var mapping = {
+      read: 'rgb(255,180,0)', // dark gold
+      all: 'rgb(50,207,50)' // lime green
+    };
+    return mapping[permission] || 'red';
+  }
+
+  function wrapPermissionInColorSpan(permission) {
+    var style = {
+      color: permissionToColor(permission)
+    };
+
+    return (
+      <span style={style}>
+        {permission}
+      </span>
+    );
+  }
+
+  return (
+    <div>
+      you({wrapPermissionInColorSpan(state.permission_str)})
+      {
+        (state.group_permissions || []).map(
+          function(perm) {
+            return (
+              <span>
+                {' ' + perm.group_name}({wrapPermissionInColorSpan(perm.permission_str)})
+              </span>
+            );
+          }
+        )
+      }
+    </div>
+  );
 }
 
 function shorten_uuid(uuid) {
