@@ -3,21 +3,23 @@ function render_permissions(state) {
   // - state.permission_str (what user has)
   // - state.group_permissions (what other people have)
   
-  function permissionToColor(permission) {
+  function permissionToClass(permission) {
     var mapping = {
-      read: 'rgb(255,180,0)', // dark gold
-      all: 'rgb(50,207,50)' // lime green
+      read: 'ws-permission-read',
+      all: 'ws-permission-all'
     };
-    return mapping[permission] || 'red';
+
+    if (mapping.hasOwnProperty(permission)) {
+      return mapping[permission];
+    }
+
+    console.error('Invalid permission:', permission);
+    return '';
   }
 
   function wrapPermissionInColorSpan(permission) {
-    var style = {
-      color: permissionToColor(permission)
-    };
-
     return (
-      <span style={style}>
+      <span className={permissionToClass(permission)}>
         {permission}
       </span>
     );
