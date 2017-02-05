@@ -656,12 +656,111 @@ var Worksheet = React.createClass({
         var worksheet_display = this.state.editMode ? raw_display : items_display;
         var editButtons = this.state.editMode ? editModeFeatures : editFeatures;
 
+        var state;
+
+        var HELP_STATES = {
+          'INITIAL': 1,
+          'OPEN': 2,
+          'SENDING': 3,
+          'FAILED': 4,
+          'SUCCESS': 5
+        };
+
+        var initializeState = function() {
+            state = HELP_STATES.INITIAL;
+        };
+
+        initializeState();
+        
+        var clickTransition = function() { // currently refers to state in closure
+            if (state === HELP_STATES.INITIAL) {
+                return HELP_STATES.OPEN;
+            } else if (state === HELP_STATES.OPEN) {
+                return HELP_STATES.SENDING;
+            } else {
+                return state;
+            }
+        };
+
+        var timerTransition = function() { // currently refers to state in closure
+            if (state === HELP_STATES.FAILED) {
+              return HELP_STATES.OPEN;
+            } else if (state === HELP_STATES.SUCCESS) {
+              // TODO clear saved text
+              return HELP_STATES.INITIAL;
+            } else {
+              return state;
+            }
+
+        };
+
+        var helpDivStyle = {
+          position: 'fixed',
+          bottom: '50px',
+          right: '50px',
+          zIndex: '1'
+        };
+
+        var helpButtonStyle = {
+          width: '50px',
+          height: '50px',
+          borderRadius: '25px',
+          backgroundColor: 'rgb(115, 156, 185)',
+          color: 'white',
+          display: ['flex', '-webkit-flex'],
+          alignItems: 'center',
+          justifyContent: 'center',
+          fontSize: '20px',
+          float: 'right',
+          margin: '3px',
+          boxShadow: 'none'
+        };
+
+        var helpMessageBoxStyle = function() {
+          var style = {
+            width: '550px',
+            height: '45px',
+            float: 'left',
+            margin: '5px',
+            marginRight: '-30px',
+            padding: '3px',
+            border: 'none'
+          };
+          
+          if (state === HELP_STATES.INITIAL) {
+              style['visibility'] = 'hidden';
+          }
+
+          return style;
+        }
+
+        var helpButtonIcon = function(state) {
+            if (state === HELP_STATES.INITIAL) {
+                return '?';
+            } else if (state === HELP_STATES.OPEN) {
+                return '>';
+            } else if (state === HELP_STATES.SENDING) {
+                return '...';
+            } else if (state === HELP_STATES.FAILURE) {
+                return 'X';
+            } else if (state === HELP_STATES.SUCCESS) {
+                return '\u2713';
+            } else {
+                console.log("ERROR: Invalid state", state);
+                return HELP_STATE.INITIAL;
+            }
+        }
+
         return (
             <div id="worksheet" className={searchClassName}>
                 {action_bar_display}
                 {chat_box_display}
                 {chat_portal}
                 {context_menu_display}
+                <div style={helpDivStyle}>
+                        <input type="text" style={helpMessageBoxStyle()}/>
+                        <button style={helpButtonStyle} onClick={clickTransition(state)}>{helpButtonIcon(state)}</button>
+                </div>
                 <div id="worksheet_panel" className="actionbar-focus">
                     {worksheet_side_panel}
                     <div className="ws-container">
