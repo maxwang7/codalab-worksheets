@@ -78,8 +78,12 @@ var HelpButton = React.createClass({
                 this.setState({state: HELP_STATES.OPEN});
                 break;
             case HELP_STATES.OPEN:
-                this.sendMessage(this.state.message);
-                this.setState({state: HELP_STATES.SENDING});
+                if (this.state.message) {
+                    this.sendMessage(this.state.message);
+                    this.setState({state: HELP_STATES.SENDING});
+                } else {
+                    this.setState({state: HELP_STATES.INITIAL});
+                }
                 break;
             default:
                 return;
@@ -92,7 +96,10 @@ var HelpButton = React.createClass({
                 this.setState({state: HELP_STATES.OPEN});
                 break;
             case HELP_STATES.SUCCESS:
-                this.setState({state: HELP_STATES.INITIAL});
+                this.setState({
+                    state: HELP_STATES.INITIAL,
+                    message: ''
+                });
                 break;
             default:
                 return;
@@ -108,16 +115,35 @@ var HelpButton = React.createClass({
             case HELP_STATES.INITIAL:
                 return '?';
             case HELP_STATES.OPEN:
-                return '>';
+                if (this.state.message) {
+                    return '>';
+                } else {
+                    return 'X';
+                }
             case HELP_STATES.SENDING:
                 return '...';
             case HELP_STATES.FAILURE:
-                return 'X';
+                return ':(';
             case HELP_STATES.SUCCESS:
                 return '\u2713';
             default:
-                console.log("Error: Invalid state", state);
+                console.log("Error: Invalid state", this.state.state);
                 return HELP_STATE.INITIAL;
+        }
+    },
+
+    helpTextMessage: function() {
+        switch (this.state.state) {
+            case HELP_STATES.OPEN:
+                return 'Questions/Comments? Send us an email here or at codalab@gmail.com';
+            case HELP_STATES.SENDING:
+                return 'Sending...';
+            case HELP_STATES.FAILURE:
+                return 'Something went wrong, please try again';
+            case HELP_STATES.SUCCESS:
+                return 'Message sent! We\'ll get back to you soon!';
+            default:
+                return '';
         }
     },
 
@@ -127,8 +153,14 @@ var HelpButton = React.createClass({
           position: 'fixed',
           bottom: '50px',
           right: '50px',
-          zIndex: '1'
+          zIndex: '1',
+          backgroundColor: 'rgba(115, 156, 185, 0.5)',
+          borderRadius: '5px',
+          paddingLeft: '10px'
       };
+      if (this.state.state === HELP_STATES.INITIAL) {
+          containerStyle.backgroundColor = '';
+      }
 
       var helpButtonStyle = {
           width: '50px',
@@ -160,6 +192,14 @@ var HelpButton = React.createClass({
           messageStyle.visibility = 'hidden';
       }
 
+      var helpTextStyle = {
+          padding: '7px',
+          paddingLeft: '20px'
+      };
+      if (this.state.state === HELP_STATES.INITIAL) {
+          helpTextStyle.visibility = 'hidden';
+      }
+
 /*
       return (
           <div style={containerStyle}>
@@ -171,8 +211,11 @@ var HelpButton = React.createClass({
 
       return (
           <div style={containerStyle}>
-              <input type="text" value={this.state.message} onChange={this.onMessageChange} style={messageStyle}/>
-              <button style={helpButtonStyle} onClick={this.clickTransition}>{this.helpButtonIcon()}</button>
+              <div style={helpTextStyle}>{this.helpTextMessage()}</div>
+              <div>
+                  <input type="text" value={this.state.message} onChange={this.onMessageChange} style={messageStyle}/>
+                  <button style={helpButtonStyle} onClick={this.clickTransition}>{this.helpButtonIcon()}</button>
+              </div>
           </div>
       );
     }
