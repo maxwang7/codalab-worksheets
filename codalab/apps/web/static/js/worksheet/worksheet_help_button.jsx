@@ -39,9 +39,9 @@ var HelpButton = React.createClass({
 
         $.ajax({
             url: '/rest/help/',
+            type: 'POST',
             data: JSON.stringify(data),
             contentType: 'application/json',
-            type: 'POST',
             success: onSuccess,
             error: onError
         });
@@ -122,13 +122,13 @@ var HelpButton = React.createClass({
                 }
             case HELP_STATES.SENDING:
                 return '...';
-            case HELP_STATES.FAILURE:
-                return ':(';
+            case HELP_STATES.FAILED:
+                return '!';
             case HELP_STATES.SUCCESS:
                 return '\u2713';
             default:
                 console.log("Error: Invalid state", this.state.state);
-                return HELP_STATE.INITIAL;
+                return HELP_STATES.INITIAL;
         }
     },
 
@@ -138,7 +138,7 @@ var HelpButton = React.createClass({
                 return 'Questions/Comments? Send us an email here or at codalab@gmail.com';
             case HELP_STATES.SENDING:
                 return 'Sending...';
-            case HELP_STATES.FAILURE:
+            case HELP_STATES.FAILED:
                 return 'Something went wrong, please try again';
             case HELP_STATES.SUCCESS:
                 return 'Message sent! We\'ll get back to you soon!';
