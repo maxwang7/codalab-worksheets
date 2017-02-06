@@ -452,6 +452,7 @@ var Worksheet = React.createClass({
     // If rawIndexAfterEditMode is defined, this refreshWorksheet is called right after toggling editMode. It should resolve rawIndex to (focusIndex, subFocusIndex) pair.
     refreshWorksheet: function(partialUpdateItems, rawIndexAfterEditMode) {
         if (partialUpdateItems === undefined) {
+          debugger;
           $('#update_progress').show();
           this.setState({updating: true});
           this.state.ws.fetch({
