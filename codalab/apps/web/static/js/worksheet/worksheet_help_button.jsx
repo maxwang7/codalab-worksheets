@@ -148,20 +148,7 @@ var HelpButton = React.createClass({
     },
 
     render: function() {
-      // TODO refactor into less
-      var containerStyle = {
-          position: 'fixed',
-          bottom: '50px',
-          right: '50px',
-          zIndex: '1',
-          backgroundColor: 'rgba(115, 156, 185, 0.5)',
-          borderRadius: '5px',
-          paddingLeft: '10px'
-      };
-      if (this.state.state === HELP_STATES.INITIAL) {
-          containerStyle.backgroundColor = '';
-      }
-
+/*
       var helpButtonStyle = {
           width: '50px',
           height: '50px',
@@ -176,8 +163,10 @@ var HelpButton = React.createClass({
           margin: '3px',
           boxShadow: 'none'
       };
+      */
 
 
+/*
       var messageStyle = {
           width: '550px',
           height: '45px',
@@ -188,17 +177,32 @@ var HelpButton = React.createClass({
           border: 'none',
           borderRadius: '15px'
       };
-      if (this.state.state === HELP_STATES.INITIAL) {
-          messageStyle.visibility = 'hidden';
-      }
+      */
+
+      var helpTextStyle = {};
+      var messageBoxStyle = {};
+      var containerStyle = {};
+
+      var helpTextIsVisible = function() {
+          return this.state.state !== HELP_STATES.INITIAL;
+      }.bind(this);
+
+      var messageBoxIsVisible = function() {
+          return this.state.state !== HELP_STATES.INITIAL;
+      }.bind(this);
+
+      var containerIsVisible = function() {
+          return this.state.state !== HELP_STATES.INITIAL;
+      }.bind(this);
+
+      helpTextStyle.visibility = helpTextIsVisible() ? null : 'hidden';
+      messageBoxStyle.visibility = messageBoxIsVisible() ? null : 'hidden';
+      containerStyle.backgroundColor = containerIsVisible() ? null : 'transparent';
 
       var helpTextStyle = {
           padding: '7px',
           paddingLeft: '20px'
       };
-      if (this.state.state === HELP_STATES.INITIAL) {
-          helpTextStyle.visibility = 'hidden';
-      }
 
 /*
       return (
@@ -210,11 +214,11 @@ var HelpButton = React.createClass({
     */
 
       return (
-          <div style={containerStyle}>
+          <div style={containerStyle} className={['help-container']}>
               <div style={helpTextStyle}>{this.helpTextMessage()}</div>
               <div>
-                  <input type="text" value={this.state.message} onChange={this.onMessageChange} style={messageStyle}/>
-                  <button style={helpButtonStyle} onClick={this.clickTransition}>{this.helpButtonIcon()}</button>
+                  <input style={messageBoxStyle} className={['help-message-box']} type="text" value={this.state.message} onChange={this.onMessageChange}/>
+                  <button className={['help-button']} onClick={this.clickTransition}>{this.helpButtonIcon()}</button>
               </div>
           </div>
       );
