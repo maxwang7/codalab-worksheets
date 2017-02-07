@@ -243,11 +243,7 @@ var Worksheet = React.createClass({
             var subFocusIndex = this.state.subFocusIndex;
             var wsItems = this.state.ws.info.items;
 
-            // TODO Is this first if statement actually necesary?
-            if (focusIndex < 0 || focusIndex > wsItems.length) {
-                // Do nothing
-                return;
-            } else if (wsItems[focusIndex].mode === 'table') {
+            if (focusIndex >= 0 && wsItems[focusIndex].mode === 'table') {
                 // worksheet_item_interface and table_item_interface do the exact same thing anyway right now
                 if (subFocusIndex - 1 < 0) {
                     this.setFocus(focusIndex - 1, 'end'); // Move out of this table to the item above the current table
