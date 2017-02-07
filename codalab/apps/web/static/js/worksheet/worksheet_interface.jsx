@@ -237,6 +237,42 @@ var Worksheet = React.createClass({
             this.toggleEditMode();
             return false;
         }.bind(this));
+
+        Mousetrap.bind(['up', 'k'], function(e) {
+            var focusIndex = this.state.focusIndex;
+            var subFocusIndex = this.state.subFocusIndex;
+            var wsItems = this.state.ws.info.items;
+
+            // TODO Is this first if statement actually necesary?
+            if (focusIndex < 0 || focusIndex > wsItems.length) {
+                // Do nothing
+                return;
+            } else if (wsItems[focusIndex].mode === 'table') {
+                // worksheet_item_interface and table_item_interface do the exact same thing anyway right now
+                if (subFocusIndex - 1 < 0) {
+                    this.setFocus(focusIndex - 1, 'end'); // Move out of this table to the item above the current table
+                } else {
+                    this.setFocus(focusIndex, subFocusIndex - 1);
+                }
+            } else { // worksheet_items.jsx
+                this.setFocus(focusIndex - 1, 'end');
+            }
+        }.bind(this), 'keydown');
+
+        Mousetrap.bind(['down', 'j'], function(e) {
+            var focusIndex = this.state.focusIndex;
+            var subFocusIndex = this.state.subFocusIndex;
+            var wsItems = this.state.ws.info.items;
+            if (focusIndex >= 0 && wsItems[focusIndex].mode === 'table') {
+                if (subFocusIndex + 1 >= wsItems[focusIndex].length) {
+                    this.setFocus(focusIndex + 1, 0);
+                } else {
+                    this.setFocus(focusIndex, subFocusIndex + 1);
+                }
+            } else {
+                this.setFocus(focusIndex + 1, 0);
+            }
+        }.bind(this), 'keydown');
     },
 
     toggleEditMode: function(editMode, saveChanges) {
@@ -452,7 +488,6 @@ var Worksheet = React.createClass({
     // If rawIndexAfterEditMode is defined, this refreshWorksheet is called right after toggling editMode. It should resolve rawIndex to (focusIndex, subFocusIndex) pair.
     refreshWorksheet: function(partialUpdateItems, rawIndexAfterEditMode) {
         if (partialUpdateItems === undefined) {
-          debugger;
           $('#update_progress').show();
           this.setState({updating: true});
           this.state.ws.fetch({

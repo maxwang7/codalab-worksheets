@@ -27,9 +27,11 @@ var WorksheetItemList = React.createClass({
         }.bind(this), 'keydown');
 
         // Move focus up one
+        /*
         Mousetrap.bind(['up', 'k'], function() {
             this.props.setFocus(this.props.focusIndex - 1, 'end');
         }.bind(this), 'keydown');
+        */
 
         // Move focus to the top
         Mousetrap.bind(['g g'], function() {
@@ -38,9 +40,11 @@ var WorksheetItemList = React.createClass({
         }.bind(this), 'keydown');
 
         // Move focus down one
+        /*
         Mousetrap.bind(['down', 'j'], function() {
             this.props.setFocus(this.props.focusIndex + 1, 0);
         }.bind(this), 'keydown');
+        */
 
         // Move focus to the bottom
         Mousetrap.bind(['shift+g'], function() {
