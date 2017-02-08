@@ -26,14 +26,11 @@ var HelpButton = React.createClass({
         };
 
         var onSuccess = function(data, status, jqXHR) {
-            console.log("success!");
-            console.log(data);
             this.messageSentTransition(true);
         }.bind(this);
 
         var onError = function(jqHXR, status, error) {
-            console.log("error");
-            console.log(error);
+            console.error(jqXHR.responseText);
             this.messageSentTransition(false);
         }.bind(this);
 
@@ -66,13 +63,12 @@ var HelpButton = React.createClass({
                 );
                 break;
             default:
-                console.log("Error: The messageSentTransition() should only be called when the program is in the SENDING state");
+                console.error("Error: The messageSentTransition() should only be called when the program is in the SENDING state");
                 return;
         }
     },
 
     clickTransition: function(e) {
-        console.log("clickTransition");
         switch (this.state.state) {
             case HELP_STATES.INITIAL:
                 this.setState({state: HELP_STATES.OPEN});
@@ -127,7 +123,7 @@ var HelpButton = React.createClass({
             case HELP_STATES.SUCCESS:
                 return '\u2713';
             default:
-                console.log("Error: Invalid state", this.state.state);
+                console.error("Error: Invalid state", this.state.state);
                 return HELP_STATES.INITIAL;
         }
     },
