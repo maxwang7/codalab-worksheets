@@ -29,7 +29,7 @@ var HelpButton = React.createClass({
             this.messageSentTransition(true);
         }.bind(this);
 
-        var onError = function(jqHXR, status, error) {
+        var onError = function(jqXHR, status, error) {
             console.error(jqXHR.responseText);
             this.messageSentTransition(false);
         }.bind(this);
