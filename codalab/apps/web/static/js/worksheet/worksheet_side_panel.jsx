@@ -19,15 +19,47 @@ var WorksheetSidePanel = React.createClass({
             self.resetPanel();
         });
         this.debouncedRefreshBundleSidePanel = _.debounce(this.refreshBundleSidePanel, 200).bind(this);
+        
+        var focus = this.getFocus();
+        debugger;
+        if (focus) {
+            var worksheet_info = this.getWorksheetInfo(focus);
+            debugger;
+        } 
+        if (focus && this.isFocusWorksheet(focus)) {
+
+          var onSuccess = function(data, status, jqXHR) {
+              // TODO figure out what data looks like and then add permission_str, or everything, into this.getWorksheetInfo(focus)
+              debugger; // 
+          }.bind(this);
+
+          var onError = function(jqXHR, status, error) {
+              console.error(jqXHR.responseText);
+              // TODO try again? Show error message?
+          }.bind(this);
+
+          $.ajax({
+              url: '/rest/worksheets/' + '/', // TODO
+              type: 'GET',
+              success: onSuccess,
+              error: onError
+          });
+        }
     },
 
+    refresh: function() {
+      if (this.refs.
+    },
+
+    // TODO
     refreshBundleSidePanel: function() {
-     if (this.refs.hasOwnProperty('bundle_info_side_panel')) {
-       this.refs.bundle_info_side_panel.refreshBundle();
-     }
-   },
+      if (this.refs.hasOwnProperty('bundle_info_side_panel')) {
+        this.refs.bundle_info_side_panel.refreshBundle();
+      }
+    },
 
     componentDidUpdate: function() {
+      // TODO
       this.debouncedRefreshBundleSidePanel();
     },
 
