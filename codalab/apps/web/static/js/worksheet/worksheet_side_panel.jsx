@@ -7,6 +7,7 @@ var WorksheetSidePanel = React.createClass({
     getInitialState: function() {
         return {};
     },
+
     componentDidMount: function(e) {
         var self = this;
         $('#dragbar_vertical').mousedown(function(e) {
@@ -20,17 +21,22 @@ var WorksheetSidePanel = React.createClass({
         });
         this.debouncedRefreshBundleSidePanel = _.debounce(this.refreshBundleSidePanel, 200).bind(this);
         
-        var focus = this.getFocus();
-        debugger;
-        if (focus) {
-            var worksheet_info = this.getWorksheetInfo(focus);
-            debugger;
-        } 
-        if (focus && this.isFocusWorksheet(focus)) {
+
+        var getWorksheet = function() {
+ //         if (this.state.worksheet_info) {
+ //           this.setState({
+ //             worksheet_info: null
+ //           });
+ //         }
+          var worksheet_info = this.getWorksheetInfo(this.getFocus());
 
           var onSuccess = function(data, status, jqXHR) {
               // TODO figure out what data looks like and then add permission_str, or everything, into this.getWorksheetInfo(focus)
-              debugger; // 
+  //            debugger; // 
+            //  this.setState({
+            //    worksheet_info: data
+            //  });
+            debugger;
           }.bind(this);
 
           var onError = function(jqXHR, status, error) {
@@ -39,20 +45,35 @@ var WorksheetSidePanel = React.createClass({
           }.bind(this);
 
           $.ajax({
-              url: '/rest/worksheets/' + '/', // TODO
+              url: '/rest/api/worksheets/' + worksheet_info.uuid + '/', // TODO
               type: 'GET',
               success: onSuccess,
               error: onError
           });
         }
-    },
-
-    refresh: function() {
-      if (this.refs.
+        this.refreshWorksheets = _.debounce(getWorksheet, 300).bind(this);
+        
     },
 
     // TODO
     refreshBundleSidePanel: function() {
+      /*
+      var focus = this.getFocus();
+      var worksheet_info;
+//      debugger;
+      if (focus) {
+          worksheet_info = this.getWorksheetInfo(focus);
+//          debugger;
+      } 
+      if (focus && this.isFocusWorksheet(focus)) {
+        if (this.state.worksheet_info) {
+          this.setState({
+            worksheet_info: null
+          });
+        }
+
+      } */
+      debugger;
       if (this.refs.hasOwnProperty('bundle_info_side_panel')) {
         this.refs.bundle_info_side_panel.refreshBundle();
       }
@@ -60,10 +81,14 @@ var WorksheetSidePanel = React.createClass({
 
     componentDidUpdate: function() {
       // TODO
+      this.refreshWorksheets();
       this.debouncedRefreshBundleSidePanel();
     },
 
     getFocus: function() {
+        return getFocusFromWorksheet(this.props.ws, this.props.focusIndex);
+
+
         // Return the state to show on the side panel
         var info = this.props.ws.info;
         if (!info) return null;
@@ -151,7 +176,7 @@ var WorksheetSidePanel = React.createClass({
         if (focus) {
           if (this.isFocusWorksheet(focus)) {
             // Show worksheet (either main worksheet or subworksheet)
-            var worksheet_info = this.getWorksheetInfo(focus);
+            var worksheet_info = this.state.worksheet_info ? this.state.worksheet_info : this.getWorksheetInfo(focus);
 
             side_panel_details = <WorksheetDetailSidePanel
                                    key={'ws' + this.props.focusIndex}

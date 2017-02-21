@@ -24,6 +24,7 @@ var Worksheet = React.createClass({
             userInfo: null, // User info of the current user. (null is the default)
             updatingBundleUuids: {},
             isUpdatingBundles: false,
+            isFetchingFocusWorksheet: false,
         };
     },
 
@@ -51,6 +52,7 @@ var Worksheet = React.createClass({
     },
 
     setFocus: function(index, subIndex, shouldScroll) {
+        debugger;
         if (shouldScroll === undefined) shouldScroll = true;
         //console.log('setFocus', index, subIndex);
         var info = this.state.ws.info;
@@ -91,6 +93,41 @@ var Worksheet = React.createClass({
         // Change the focus - triggers updating of all descendants.
         this.setState({focusIndex: index, subFocusIndex: subIndex, focusedBundleUuidList: focusedBundleUuidList});
         if (shouldScroll) this.scrollToItem(index, subIndex);
+    },
+
+    fetchFocusWorksheet: function() {
+        // TODO
+      // [] Finish implementing fetchFocusWorksheet
+      // [] Pass fetchFocusWorksheet function all the way down to WorksheetItemInterface -- call it in handleRowClick
+      // [] Pass isFetchingFocusWorksheet all the way down to WorksheetSidePanel
+        // [] in the render fn: If focused on worksheet and isFetchingFocusWorksheet is true, display a loading indicator
+        var focus = getFocusFromWorksheet(this.state.ws, this.state.focusIndex);
+        if (!focus || this.state.ws.info === focus) return;
+        var info = getWorksheetInfo(focus);
+        this.setState({
+            isFetchingFocusWorksheet: true
+        });
+        var onSuccess = function(data, status, jqXHR) {
+            // TODO
+            var subworksheetInfo = _.extend({}, data);
+this.state.ws.info.items[index].interpreted.items[subIndex].subworksheetInfo
+            var newWorksheetInfo = this.state
+            this.setState({
+              isFetchingFocusWorksheet: false,
+            });
+        }.bind(this);
+        var onError = function(jqXHR, status, error) {
+            // TODO
+            this.setState({
+                isFetchingFocusWorksheet: false
+            });
+        }.bind(this);
+        $.ajax({
+            url: '/rest/api/worksheets/' + info.uuid + '/',
+            type: 'GET',
+            success: onSuccess,
+            error: onError
+        });
     },
 
     scrollToItem: function(index, subIndex) {

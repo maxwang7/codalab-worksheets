@@ -220,3 +220,23 @@ function getDefaultBundleMetadata(name) {
     ]
   };
 }
+
+function getFocusFromWorksheet(worksheet, focusIndex) {
+  var info = worksheet.info;
+  if (!info) return null;
+  if (focusIndex == -1) return info; // Not focused on anything, show worksheet
+  return info.items[focusIndex];
+}
+
+function getWorksheetInfo(focus) {
+  if (focus.mode == 'worksheet')
+    return focus.subworksheet_info;
+  else if (focus.mode == 'wsearch') {
+    if (this.props.subFocusIndex == -1)
+      return null;
+    var item = focus.interpreted.items[this.props.subFocusIndex];
+    return item ? item.subworksheet_info : null;
+  }
+  else
+    return focus;
+}
