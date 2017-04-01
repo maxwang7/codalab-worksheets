@@ -30,3 +30,15 @@ gulp.task('clean', function() {
     del(['static/dist']);
     del(['static/css/imports.css']);
 });
+
+// Watch mode for development
+gulp.task('watch', function () {
+  gulp.watch([
+    'static/js/bundle/*.jsx',
+    'static/js/worksheet/*.jsx',
+    'static/js/account/*.jsx',
+    'static/js/common/*.jsx'
+  ], ['jsx']);
+
+  gulp.watch('static/less/imports.less', ['less']);
+});
