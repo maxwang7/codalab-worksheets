@@ -113,18 +113,18 @@ var TableRow = React.createClass({
         this.props.updateRowIndex(this.props.rowIndex);
     },
 
-    handleOptionButtonClick(event) {
-        event.nativeEvent.stopImmediatePropagation();
-        this.boundHandleContextMenu(event)
+    handleOptionButtonClick(e) {
+        e.nativeEvent.stopImmediatePropagation();
+        this.boundHandleContextMenu(e);
     },
 
-    boundHandleContextMenu(event) {
+    boundHandleContextMenu(e) {
         this.props.handleContextMenu.bind(
             null, this.props.bundleInfo.uuid,
             this.props.focusIndex,
             this.props.rowIndex,
             this.props.bundleInfo.bundle_type === 'run'
-        )(event)
+        )(e);
     },
 
     render: function() {
