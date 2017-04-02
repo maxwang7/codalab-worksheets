@@ -167,9 +167,9 @@ var TableRow = React.createClass({
             <tr className={focusedClass} onClick={this.handleClick} onContextMenu={this.boundHandleContextMenu}>
                 {row_cells}
                 <td className="table-column-_dropdown">
-                    <button onClick={this.handleOptionButtonClick}>
+                    <div onClick={this.handleOptionButtonClick}>
                         <span className="caret"></span>
-                    </button>
+                    </div>
                 </td>
             </tr>
         );
